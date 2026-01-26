@@ -1,0 +1,18 @@
+services:
+  search-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: search-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BACKEND_URL=http://search-server:1213
+    networks:
+      - archive-network
+    restart: unless-stopped
+
+networks:
+  archive-network:
+    external: true
