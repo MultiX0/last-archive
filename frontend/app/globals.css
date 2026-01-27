@@ -16,8 +16,8 @@
   --secondary-foreground: oklch(0.09 0 0);
   --muted: oklch(0.25 0 0); /* Muted backgrounds */
   --muted-foreground: oklch(0.6 0 0); /* Muted text */
-  --accent: oklch(0.72 0.13 85); /* Amber for references */
-  --accent-foreground: oklch(0.09 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.22 0 0); /* Subtle borders */
@@ -134,6 +134,10 @@
   }
 }
 
+html, body {
+  scroll-behavior: smooth;
+}
+
 @layer utilities {
   .pb-safe {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
@@ -157,4 +161,33 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
   background-size: 1000px 100%;
   animation: shimmer 3s infinite;
+}
+
+.markdown > * {
+  all: revert;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3b3b3b transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #3b3b3b;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }

@@ -1,25 +1,25 @@
 "use client"
 
-import Link from "next/link"
-import Image from "next/image"
-import { useState, useEffect } from "react"
-import { ArrowRight, Search, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { fetchStats, type StatsData } from "@/lib/search-api"
+import Link from "next/link";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { ArrowRight, Search, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { fetchStats, type StatsData } from "@/lib/search-api";
 
 export default function LandingPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [stats, setStats] = useState<StatsData | null>(null)
-  const [isLoadingStats, setIsLoadingStats] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
     const loadStats = async () => {
-      setIsLoadingStats(true)
-      const data = await fetchStats()
-      setStats(data)
-      setIsLoadingStats(false)
+      setIsLoadingStats(true);
+      const data = await fetchStats();
+      setStats(data);
+      setIsLoadingStats(false);
     }
-    loadStats()
+    loadStats();
   }, [])
 
   const suggestedQueries = [
@@ -29,7 +29,7 @@ export default function LandingPage() {
     "The Renaissance period",
     "Origins of human civilization",
     "Discovery of DNA structure",
-  ]
+  ];
 
   return (
     <div className="min-h-dvh bg-[#0A0A0A] text-white flex flex-col">
@@ -48,7 +48,7 @@ export default function LandingPage() {
               <span className="text-base font-medium">The Last Archive</span>
             </div>
             <Link href="/chat">
-              <Button size="sm" className="bg-[#60A5FA] hover:bg-[#3B82F6] text-white border-0 h-8 text-sm font-normal">
+              <Button size="sm" className="bg-[#60A5FA] hover:bg-[#3B82F6] text-white border-0 h-8 text-sm font-normal cursor-pointer">
                 Launch
               </Button>
             </Link>
@@ -93,7 +93,7 @@ export default function LandingPage() {
                 <Link href={searchQuery.trim() ? `/chat?q=${encodeURIComponent(searchQuery)}` : "/chat"}>
                   <Button
                     size="sm"
-                    className="bg-[#60A5FA] hover:bg-[#3B82F6] text-white border-0 h-10 px-6 text-sm font-normal"
+                    className="bg-[#60A5FA] hover:bg-[#3B82F6] text-white border-0 h-10 px-6 text-sm font-normal cursor-pointer"
                   >
                     Search
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -109,7 +109,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {suggestedQueries.map((query, index) => (
                 <Link key={index} href={`/chat?q=${encodeURIComponent(query)}`}>
-                  <button className="w-full text-left px-4 py-3 rounded-lg bg-[#1A1A1A] border border-white/10 hover:border-white/20 hover:bg-[#1F1F1F] transition-all text-sm text-gray-300 group">
+                  <button className="w-full text-left px-4 py-3 rounded-lg bg-[#1A1A1A] border border-white/10 hover:border-white/20 hover:bg-[#1F1F1F] transition-all text-sm text-gray-300 group cursor-pointer">
                     <span className="group-hover:text-white transition-colors">{query}</span>
                   </button>
                 </Link>

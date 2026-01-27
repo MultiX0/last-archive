@@ -1,15 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { ChatInterface } from "@/components/chat-interface"
-import { Sidebar } from "@/components/sidebar"
-import { Header } from "@/components/header"
+import { useState } from "react";
+import { ChatInterface } from "@/components/chat-interface";
+import { Sidebar } from "@/components/sidebar";
+import { Header } from "@/components/header";
 
-import { Suspense } from "react"
-import { Loader2 } from "lucide-react"
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function ChatPage() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-dvh w-screen bg-background overflow-hidden">

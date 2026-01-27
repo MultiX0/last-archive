@@ -1,75 +1,73 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
-import { Loader2 } from "lucide-react"
-import { MessageList } from "@/components/message-list"
-import { ChatInput } from "@/components/chat-input"
-import { SuggestedPrompts } from "@/components/suggested-prompts"
-import { searchStream, type SourceItem, type SourcesPayload, getSession } from "@/lib/search-api"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useState, useRef, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { MessageList } from "@/components/message-list";
+import { ChatInput } from "@/components/chat-input";
+import { SuggestedPrompts } from "@/components/suggested-prompts";
+import { searchStream, type SourceItem, type SourcesPayload, getSession } from "@/lib/search-api";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  sources?: SourceItem[]
-  status?: string
-  isStreaming?: boolean
-  searchTimeMs?: number
-  totalTimeMs?: number
-  error?: string
+  id: string,
+  role: "user" | "assistant",
+  content: string,
+  sources?: SourceItem[],
+  status?: string,
+  isStreaming?: boolean,
+  searchTimeMs?: number,
+  totalTimeMs?: number,
+  error?: string,
 }
 
 
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const abortControllerRef = useRef<AbortController | null>(null)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const currentSessionId = searchParams.get("id")
-  const initialQuery = searchParams.get("q")
-  const hasSearched = useRef(false)
-  const isGeneratingRef = useRef(false)
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const currentSessionId = searchParams.get("id");
+  const initialQuery = searchParams.get("q");
+  const hasSearched = useRef(false);
+  const isGeneratingRef = useRef(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const handleResize = () => {
       if (scrollContainerRef.current && messages.length > 0) {
-        scrollToBottom()
+        scrollToBottom();
       }
     }
 
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [messages.length])
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [messages.length]);
 
   useEffect(() => {
     if (currentSessionId) {
       if (!isGeneratingRef.current) {
-        loadHistory(currentSessionId)
+        loadHistory(currentSessionId);
       }
     } else {
-      setMessages([])
+      setMessages([]);
     }
-  }, [currentSessionId])
+  }, [currentSessionId]);
 
   const loadHistory = async (id: string) => {
-    setIsLoadingHistory(true)
-    const data = await getSession(id)
+    setIsLoadingHistory(true);
+    const data = await getSession(id);
     if (data) {
       const historyMessages: Message[] = data.history.map((msg, idx) => ({
         id: `${id}-${idx}`,
@@ -78,25 +76,25 @@ export function ChatInterface() {
         sources: msg.sources?.items,
         searchTimeMs: msg.sources?.searchTimeMs,
       }))
-      setMessages(historyMessages)
+      setMessages(historyMessages);
     }
-    setIsLoadingHistory(false)
+    setIsLoadingHistory(false);
   }
 
   // Handle Initial Search
   useEffect(() => {
     if (initialQuery && !hasSearched.current && !currentSessionId) {
-      hasSearched.current = true
-      handleSendMessage(initialQuery)
+      hasSearched.current = true;
+      handleSendMessage(initialQuery);
     }
-  }, [initialQuery, currentSessionId])
+  }, [initialQuery, currentSessionId]);
 
   const handleSendMessage = async (content: string) => {
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
+      abortControllerRef.current.abort();
     }
-    abortControllerRef.current = new AbortController()
-    isGeneratingRef.current = true
+    abortControllerRef.current = new AbortController();
+    isGeneratingRef.current = true;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -104,9 +102,9 @@ export function ChatInterface() {
       content,
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage]);
 
-    const aiMessageId = (Date.now() + 1).toString()
+    const aiMessageId = (Date.now() + 1).toString();
     const aiMessage: Message = {
       id: aiMessageId,
       role: "assistant",
@@ -115,7 +113,7 @@ export function ChatInterface() {
       isStreaming: true,
     }
 
-    setMessages((prev) => [...prev, aiMessage])
+    setMessages((prev) => [...prev, aiMessage]);
 
     try {
       await searchStream(
@@ -126,11 +124,11 @@ export function ChatInterface() {
               prev.map((msg) =>
                 msg.id === aiMessageId ? { ...msg, status } : msg
               )
-            )
+            );
           },
           onSession: (sessionId) => {
             if (!currentSessionId && sessionId) {
-              router.replace(`/chat?id=${sessionId}`)
+              router.replace(`/chat?id=${sessionId}`);
             }
           },
           onSources: (data: SourcesPayload) => {
@@ -140,7 +138,7 @@ export function ChatInterface() {
                   ? { ...msg, sources: data.items, searchTimeMs: data.searchTimeMs }
                   : msg
               )
-            )
+            );
           },
           onToken: (token) => {
             setMessages((prev) =>
@@ -149,7 +147,7 @@ export function ChatInterface() {
                   ? { ...msg, content: msg.content + token, status: undefined }
                   : msg
               )
-            )
+            );
           },
           onDone: (data) => {
             isGeneratingRef.current = false
@@ -159,7 +157,7 @@ export function ChatInterface() {
                   ? { ...msg, isStreaming: false, totalTimeMs: data.totalTimeMs }
                   : msg
               )
-            )
+            );
           },
           onError: (error) => {
             isGeneratingRef.current = false
@@ -169,7 +167,7 @@ export function ChatInterface() {
                   ? { ...msg, isStreaming: false, error, status: undefined }
                   : msg
               )
-            )
+            );
           },
         },
         currentSessionId || null,
@@ -177,9 +175,9 @@ export function ChatInterface() {
       )
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
-        return // Request was cancelled, ignore
+        return;
       }
-      isGeneratingRef.current = false
+      isGeneratingRef.current = false;
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === aiMessageId
@@ -191,7 +189,7 @@ export function ChatInterface() {
               }
             : msg
         )
-      )
+      );
     }
   }
 

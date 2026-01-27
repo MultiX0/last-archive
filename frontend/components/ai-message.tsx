@@ -3,6 +3,12 @@ import { useState } from "react"
 import { Bot, ExternalLink, FileText, Globe, AlertCircle, Clock, ChevronDown, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { SourceItem } from "@/lib/search-api"
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import CodeBlock from "./markdown-plugins/CodeBlock"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Separator } from "./ui/separator"
 
 interface AiMessageProps {
   content: string
@@ -29,7 +35,7 @@ export function AiMessage({
 
   return (
     <div className="flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300">
-      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+      <div className="w-7 h-7 rounded-lg bg-linear-to-br from-primary/10 to-secondary/10 border border-primary/20 flex items-center justify-center shrink-0">
         <Bot className="h-4 w-4 text-primary" />
       </div>
       <div className="flex-1 space-y-3 min-w-0">
@@ -71,7 +77,7 @@ export function AiMessage({
                   >
                     <div
                       className={cn(
-                        "flex items-center justify-center w-6 h-6 rounded flex-shrink-0",
+                        "flex items-center justify-center w-6 h-6 rounded shrink-0",
                         source.type === "pdf"
                           ? "bg-red-500/20 text-red-400"
                           : "bg-blue-500/20 text-blue-400"
@@ -86,10 +92,10 @@ export function AiMessage({
                     <span className="text-sm text-foreground/80 group-hover:text-foreground truncate flex-1">
                       {source.title || source.url}
                     </span>
-                    <span className="text-xs text-muted-foreground flex-shrink-0">
+                    <span className="text-xs text-muted-foreground shrink-0">
                       {Math.round(source.score * 100)}%
                     </span>
-                    <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
                 ))}
                 {sources.length > 5 && (
@@ -138,7 +144,7 @@ export function AiMessage({
         {showContent && (
           <div
             className={cn(
-              "rounded-lg border backdrop-blur-sm p-4",
+              "rounded-lg border backdrop-blur-sm p-4 markdown",
               error
                 ? "border-destructive/50 bg-destructive/10"
                 : "border-border/50 bg-card/20"
@@ -146,16 +152,33 @@ export function AiMessage({
           >
             {error ? (
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                 <p className="text-destructive text-sm">{error}</p>
               </div>
             ) : (
-              <p className="text-foreground/90 leading-relaxed text-pretty whitespace-pre-wrap break-words">
-                {content}
+              <div className="text-foreground/90 leading-relaxed text-pretty whitespace-pre-wrap wrap-break-word prose prose-invert markdown">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}
+                    components={{
+                      code({ className, children }) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        return match ? (
+                          <CodeBlock className={className}>
+                            {children}
+                          </CodeBlock>
+                        ) : (
+                          <code className="bg-neutral-800 px-1 rounded">
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                >
+                  {content}
+                </ReactMarkdown>
                 {isStreaming && (
                   <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse" />
                 )}
-              </p>
+              </div>
             )}
           </div>
         )}
@@ -192,7 +215,7 @@ function SourcesList({ sources, searchTimeMs }: { sources: SourceItem[]; searchT
           >
             <div
               className={cn(
-                "flex items-center justify-center w-6 h-6 rounded flex-shrink-0",
+                "flex items-center justify-center w-6 h-6 rounded shrink-0",
                 source.type === "pdf" ? "bg-red-500/20 text-red-400" : "bg-blue-500/20 text-blue-400",
               )}
             >
@@ -205,8 +228,8 @@ function SourcesList({ sources, searchTimeMs }: { sources: SourceItem[]; searchT
             <span className="text-sm text-foreground/80 group-hover:text-foreground truncate flex-1">
               {source.title || source.url}
             </span>
-            <span className="text-xs text-muted-foreground flex-shrink-0">{Math.round(source.score * 100)}%</span>
-            <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            <span className="text-xs text-muted-foreground shrink-0">{Math.round(source.score * 100)}%</span>
+            <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
           </a>
         ))}
         {sources.length > 5 && (

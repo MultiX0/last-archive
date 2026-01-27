@@ -1,53 +1,69 @@
 "use client"
 
-import { useState, useRef, useEffect, type KeyboardEvent } from "react"
-import { Send } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
+import { Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatInputProps {
-  onSend: (message: string) => void
+  onSend: (message: string) => void,
 }
 
 export function ChatInput({ onSend }: ChatInputProps) {
-  const [input, setInput] = useState("")
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    const textarea = textareaRef.current
-    if (!textarea) return
+    const textarea = textareaRef.current;
+    if (!textarea) return;
 
     const handleFocus = () => {
       setTimeout(() => {
-        textarea.scrollIntoView({ behavior: "smooth", block: "nearest" })
-      }, 300)
+        textarea.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 300);
     }
 
-    textarea.addEventListener("focus", handleFocus)
-    return () => textarea.removeEventListener("focus", handleFocus)
-  }, [])
+    textarea.addEventListener("focus", handleFocus);
+    return () => textarea.removeEventListener("focus", handleFocus);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown as any);
+    return () => window.removeEventListener("keydown", handleKeyDown as any);
+  }, []);
 
   const handleSend = () => {
     if (input.trim()) {
-      onSend(input.trim())
-      setInput("")
+      onSend(input.trim());
+      setInput("");
       if (textareaRef.current) {
-        textareaRef.current.style.height = "auto"
+        textareaRef.current.style.height = "auto";
       }
     }
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+
+    const textarea = textareaRef.current;
+
+    if (e.key === "Enter" && e.shiftKey) {
+      if (document.activeElement !== textarea) {
+        e.preventDefault();
+        textarea?.focus();
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
   }
 
   const handleInput = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }
 
@@ -62,14 +78,14 @@ export function ChatInput({ onSend }: ChatInputProps) {
             onKeyDown={handleKeyDown}
             onInput={handleInput}
             placeholder="Ask about humanity's knowledge..."
-            className="min-h-[44px] max-h-[200px] resize-none border-0 bg-transparent px-3 py-2.5 pr-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base"
+            className="min-h-11 max-h-50 resize-none border-0 bg-transparent px-3 py-2.5 pr-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-sm md:text-base"
             rows={1}
           />
           <Button
             onClick={handleSend}
             disabled={!input.trim()}
             size="icon"
-            className="absolute right-1.5 bottom-1.5 h-8 w-8 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:bg-muted transition-colors"
+            className="absolute right-1.5 bottom-1.5 h-8 w-8 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:bg-muted transition-colors cursor-pointer"
           >
             <Send className="h-4 w-4" />
           </Button>

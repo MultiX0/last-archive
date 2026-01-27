@@ -1,51 +1,67 @@
 "use client"
 
-import { X, MessageSquare, Plus, Trash2, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
-import { getSessions, deleteSession, type Session, type StatsData, fetchStats } from "@/lib/search-api"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { X, MessageSquare, Plus, Trash2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { getSessions, deleteSession, type Session, type StatsData, fetchStats } from "@/lib/search-api";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
+import { toast } from "sonner";
 
 interface SidebarProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean,
+  onClose: () => void,
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [stats, setStats] = useState<StatsData | null>(null)
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const currentSessionId = searchParams.get("id")
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentSessionId = searchParams.get("id");
+
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchStats().then(setStats)
-    loadSessions()
+    fetchStats().then(setStats);
+    loadSessions();
   }, [])
 
   useEffect(() => {
-    loadSessions()
-  }, [currentSessionId])
+    loadSessions();
+  }, [currentSessionId]);
 
   const loadSessions = async () => {
-    const data = await getSessions()
-    setSessions(data)
-    setIsLoading(false)
+    const data = await getSessions();
+    setSessions(data);
+    setIsLoading(false);
   }
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (confirm("Delete this chat?")) {
-      await deleteSession(id)
-      await loadSessions()
-      if (currentSessionId === id) {
-        router.push("/chat")
-      }
+
+  const handleOpenDeleteDialog = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSessionId(id);
+    setDeleteDialog(true);
+  }
+
+  const handleDelete = async () => {
+    if (!sessionId) {
+      toast.error("Error Deleting chat.", { description: "Something went wrong, Please try again." });
+      return;
     }
+    await deleteSession(sessionId);
+    await loadSessions();
+    if (currentSessionId === sessionId) {
+      router.push("/chat");
+    }
+    setSessionId(null);
+    setDeleteDialog(false);
+    toast.success("Deleted", { description: "Chat deleted successfuly" });
   }
 
   return (
@@ -82,7 +98,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             <Link href="/chat" onClick={onClose}>
-              <Button className="w-full justify-start gap-2 hover:bg-primary hover:text-primary-foreground" variant={!currentSessionId ? "secondary" : "outline"}>
+              <Button className="w-full justify-start gap-2 hover:bg-primary hover:text-primary-foreground cursor-pointer" variant={!currentSessionId ? "secondary" : "outline"}>
                 <Plus className="h-4 w-4" />
                 New Chat
               </Button>
@@ -115,16 +131,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             : "text-foreground/80 hover:bg-muted/50 hover:text-foreground"
                         )}
                       >
-                        <MessageSquare className="h-4 w-4 flex-shrink-0 opacity-70" />
+                        <MessageSquare className="h-4 w-4 shrink-0 opacity-70" />
                         <span className="flex-1 truncate">{session.title || "Untitled Chat"}</span>
                         
-                        <button
-                          onClick={(e) => handleDelete(e, session.id)}
-                          className="opacity-0 group-hover:opacity-100 hover:text-destructive p-1 rounded transition-all"
+                        <Button
+                          size={"icon-sm"}
+                          variant={"ghost"}
+                          onClick={(e) => handleOpenDeleteDialog(e, session.id)}
+                          className="opacity-0 group-hover:opacity-100 hover:text-destructive transition-all cursor-pointer"
                           title="Delete chat"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        </Button>
                       </Link>
                     ))}
                   </div>
@@ -140,11 +158,43 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <span className="text-xs font-semibold text-secondary">99.9%</span>
               </div>
               <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                <div className="h-full w-[99.9%] bg-gradient-to-r from-secondary to-primary rounded-full" />
+                <div className="h-full w-[99.9%] bg-linear-to-r from-secondary to-primary rounded-full" />
               </div>
             </div>
           </div>
         </div>
+
+        <Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+                  <DialogTitle>Delete this chat?</DialogTitle>
+
+                <DialogDescription>
+                    Are i sure u want to delete this chat?
+                </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+                <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => setDeleteDialog(false)}
+                    // disabled={loading}
+                >
+                    cancel
+                </Button>
+
+                <Button
+                    variant="destructive"
+                    className="cursor-pointer"
+                    onClick={handleDelete}
+                    // disabled={loading}
+                >
+                    Delete
+                </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </aside>
     </>
   )
