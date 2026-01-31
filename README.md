@@ -18,7 +18,7 @@
   <a href="#quick-start">Quick Start</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#tech-stack">Tech Stack</a> •
-  <a href="#very-important-note-read-before-complaining)">IMPORTANT</a> •
+  <a href="#very-important-note-read-before-complaining">IMPORTANT</a> •
   <a href="#license">License</a>
 </p>
 
