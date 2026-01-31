@@ -163,6 +163,41 @@ If you don’t know how to use the service, **that is your own issue**, not a re
 
 ---
 
+### How to Run the System (Yes, This Matters)
+
+You **must run the system using the provided shell or PowerShell scripts**, depending on your operating system.
+
+**Do NOT run `docker-compose` manually from the root directory.**  
+If you do that and nothing starts, **that is NOT a bug**.
+
+### Why?
+
+- The system is **split into multiple microservices**.
+- Each service has **its own Docker configuration**.
+- All services communicate over a **specific internal Docker network**.
+- That network is **created and managed by the provided shell (`archive.sh`) or PowerShell (`archive.ps1`) scripts**.
+
+If you skip the scripts:
+- The network will not be created correctly
+- Services will not discover each other
+- The system will not start properly
+
+Again: **this is expected behavior, not a bug**.
+
+### Final Warning (Seriously)
+
+- Do **NOT** run services separately unless you **actually know what you’re doing**.
+- Do **NOT** mix manual Docker commands with the automated setup.
+- Do **NOT** open a stupid issue about this when you:
+  - Didn’t follow the instructions
+  - Don’t understand Docker
+  - Ignored the setup scripts
+
+There is a **shell script and a PowerShell script for a reason**.  
+Use them.
+
+---
+
 ## Contributing
 We welcome contributions to **The Last Archive**! Whether it's reporting a bug, suggesting a feature, or submitting a pull request, your help is appreciated.
 
