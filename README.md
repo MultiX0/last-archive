@@ -123,6 +123,46 @@ Key environment variables used across the services (managed via `.env` files in 
 
 ---
 
+## Very Important Note (Read Before Complaining)
+
+**The Last Archive is NOT magic out of the box.**
+
+This system is **entirely database-driven**.  
+If your database is empty or barely populated, **the model will appear “dumb” — because it has nothing to work with.**
+
+### Read this carefully:
+
+- You **must let the crawler run for a decent amount of time**.
+- You **must crawl a meaningful amount of data** before expecting useful answers.
+- The **more content you crawl, the better the system gets** — this is how RAG works.
+- If you crawl one website (or worse, one page) and then complain that *“it’s not working”*, that is **your mistake**, not a bug.
+
+### About Issues (Yes, This Is Blunt)
+
+**Do NOT open an issue stupidally saying “it’s not working” when:**
+- You didn’t let the crawler run long enough  
+- Your database is almost empty  
+- You don’t understand how the service works  
+- You didn’t read the documentation  
+
+That is **not a bug**. That is **user error**.
+
+### Design Reality Check
+
+- The model **does not hallucinate knowledge**.
+- It **only responds based on what exists in the database**.
+- No data = no intelligence.
+- More crawled data = better answers.
+
+### Stability Statement
+
+This project has been **tested thoroughly on both Windows and Linux** before publishing.  
+The services, crawler, and pipeline **work as intended** when used correctly.
+
+If you don’t know how to use the service, **that is your own issue**, not a reason to open an issue.
+
+---
+
 ## Contributing
 We welcome contributions to **The Last Archive**! Whether it's reporting a bug, suggesting a feature, or submitting a pull request, your help is appreciated.
 
